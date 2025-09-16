@@ -4,24 +4,36 @@ import cors from "cors";
 import fs from "fs";
 import path from "path";
 import dotenv from "dotenv";
-// import OpenAI from "openai";
+import axios from "axios";
+
 import Review from "./models/Review.js";
 import Template from "./models/Template.js";
+
+// ✅ Load environment variables
 dotenv.config();
 
+// ✅ Express app
 const app = express();
+const PORT = process.env.PORT || 5000;
+
+// ✅ Middleware
 app.use(cors());
 app.use(express.json());
 
-// ✅ OpenAI Setup (v4+)
-// const openai = new OpenAI({
-//   apiKey: process.env.OPENAI_API_KEY,
-// });
 
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}).then(() => {
+  console.log("✅ MongoDB connected");
+}).catch((err) => {
+  console.error("❌ MongoDB connection error:", err);
+});
 // ✅ Root Route
 app.get("/", (req, res) => {
   res.send("✅ VibeReviews Backend Running with MongoDB!");
 });
+
 
 // ================== 📌 Reviews API ==================
 app.get("/api/reviews", async (req, res) => {
@@ -71,9 +83,6 @@ app.delete("/api/reviews/:id", async (req, res) => {
 });
 
 // ================== 🤖 AI Review Generator ==================
-// ================== 🤖 AI Review Generator (OpenRouter Version) ==================
-import axios from "axios";
-
 app.post("/api/generate-review", async (req, res) => {
   const { prompt } = req.body;
   if (!prompt) {
@@ -86,14 +95,8 @@ app.post("/api/generate-review", async (req, res) => {
       {
         model: 'mistralai/mistral-7b-instruct',
         messages: [
-          {
-            role: "system",
-            content: "You are a helpful assistant generating product reviews.",
-          },
-          {
-            role: "user",
-            content: `Write a customer review in JSON with fields: name, rating, review, and image. Review prompt: ${prompt}`,
-          },
+          { role: "system", content: "You are a helpful assistant generating product reviews." },
+          { role: "user", content: `Write a customer review in JSON with fields: name, rating, review, and image. Review prompt: ${prompt}` },
         ],
       },
       {
@@ -126,7 +129,6 @@ app.post("/api/generate-review", async (req, res) => {
   }
 });
 
-
 // ================== 🎡 Carousel API ==================
 app.get("/api/carousel", async (req, res) => {
   try {
@@ -139,11 +141,7 @@ app.get("/api/carousel", async (req, res) => {
 
 app.post("/api/carousel/:id", async (req, res) => {
   try {
-    const review = await Review.findByIdAndUpdate(
-      req.params.id,
-      { isCarousel: true },
-      { new: true }
-    );
+    const review = await Review.findByIdAndUpdate(req.params.id, { isCarousel: true }, { new: true });
     if (!review) {
       return res.status(404).json({ success: false, message: "Review not found" });
     }
@@ -155,11 +153,7 @@ app.post("/api/carousel/:id", async (req, res) => {
 
 app.delete("/api/carousel/:id", async (req, res) => {
   try {
-    const review = await Review.findByIdAndUpdate(
-      req.params.id,
-      { isCarousel: false },
-      { new: true }
-    );
+    const review = await Review.findByIdAndUpdate(req.params.id, { isCarousel: false }, { new: true });
     if (!review) {
       return res.status(404).json({ success: false, message: "Review not found" });
     }
@@ -290,15 +284,7 @@ app.delete("/api/templates/:id", async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 });
-
-// ================== 🔥 Start Server ==================
-const PORT = 5000;
-mongoose.connect("mongodb://127.0.0.1:27017/vibereviews", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-  .then(() => {
-    console.log("✅ MongoDB Connected");
-    app.listen(PORT, () => console.log(`🚀 Backend running at http://localhost:${PORT}`));
-  })
-  .catch((err) => console.error("❌ MongoDB connection error:", err));
+// ✅ Start server
+app.listen(PORT, () => {
+  console.log(`🚀 Server running at http://localhost:${PORT}`);
+});
