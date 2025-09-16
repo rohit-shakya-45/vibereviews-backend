@@ -1,0 +1,26 @@
+{
+  "cardsCarousel": {
+    "maximumWidth": "1100px",
+    "cornerRadius": "12px",
+    "reviewsOnDesktop": 4,
+    "reviewsOnMobile": 1,
+    "maxCharacters": 100,
+    "cardHeight": {
+      "mobile": "400px",
+      "desktop": "500px"
+    },
+    "colors": {
+      "reviewerName": "#000000",
+      "text": "#000000",
+      "textBackground": "#FFFFFF",
+      "stars": "#EBBF20",
+      "starsBackground": "#FFFFFF",
+      "arrowBackground": "#FFFFFF",
+      "arrow": "#9A9A9A"
+    },
+    "shadowAndBorder": {
+      "dropShadowStyle": "0px 2px 10px rgba(0,0,0,0.1)",
+      "showBorder": false
+    }
+  }
+}
